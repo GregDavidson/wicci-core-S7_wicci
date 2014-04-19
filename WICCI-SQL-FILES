@@ -1,0 +1,20 @@
+wicci-schema.sql s6-http.sql-out
+wicci-code.sql
+404.html
+wicci-account-data.sql
+wicci-core-test.sql
+wicci-page-schema.sql
+wicci-page-code.sql
+wicci-page-serve.sql
+wicci-page-simple-data.sql
+wicci-page-simple-test.sql
+wicci-page-fancy-data.sql
+wicci-page-fancy-test.sql
+wicci-page-404-data.sql
+user.html
+wicci-page-user-data.sql
+wicci-page-test.sql
+#wicci-css-data.sql
+#xfiles -- see Makefile
+wicci-test-index-data.sql xfiles
+s7-wicci.sql
