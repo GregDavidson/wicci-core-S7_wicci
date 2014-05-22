@@ -8,7 +8,7 @@
 * [Wicci S3_more](https://github.com/GregDavidson/wicci-core-S3_more)
 * [Wicci S4_doc](https://github.com/GregDavidson/wicci-core-S4_doc)
 * [Wicci S5_xml](https://github.com/GregDavidson/wicci-core-S5_xml)
-* [Wicci S7_http](https://github.com/GregDavidson/wicci-core-S7_http)
+* [Wicci S6_http](https://github.com/GregDavidson/wicci-core-S6_http)
 
 ## Wicci Intelligent Community Collaboration Infrastructure
 
