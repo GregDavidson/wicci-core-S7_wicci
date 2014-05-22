@@ -18,14 +18,15 @@ SELECT http_requests_text(
 );
 
 SELECT debug_on(
-	'wicci_serve(http_transfer_refs,uri_refs,uri_query_refs)',
+	'wicci_serve(http_transfer_refs,uri_refs,uri_query_refs,http_response_name_refs)',
 	true
 );
 
 SELECT debug_on(
 	'try_wicci_serve_responses(
 		env_refs, http_transfer_refs,
-		wicci_user_refs, uri_refs, uri_query_refs
+		wicci_user_refs, uri_refs,
+		uri_query_refs, http_response_name_refs
 	)',
 	true
 );

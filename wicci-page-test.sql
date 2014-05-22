@@ -16,38 +16,45 @@ SELECT set_file('wicci-page-test.sql', '$Id');
 -- *
 -- put in some more tests here!!!
 
+CREATE OR REPLACE FUNCTION public.wicci_debug_on() RETURNS void AS $$
+				SELECT debug_on( 'wicci_serve(text,http_response_name_refs)', true);
+				SELECT debug_on( 'wicci_serve(http_transfer_refs,uri_refs,uri_query_refs,http_response_name_refs)', true);
+				-- SELECT debug_on( 'wicci_serve(env_refs, http_transfer_refs)', true);
+				SELECT debug_on( 'try_wicci_serve_responses(
+					env_refs, http_transfer_refs, wicci_user_refs,
+					uri_refs, uri_query_refs, http_response_name_refs
+				)', true );
+				SELECT debug_on( 'wicci_serve_responses(text,http_response_name_refs)', true );
+				SELECT debug_on('wicci_serve_file_body(doc_refs, http_response_name_refs)', true);
+				SELECT debug_on( 'try_wicci_serve_responses(
+						env_refs, http_transfer_refs, wicci_user_refs, uri_refs,
+						uri_query_refs,	http_response_refs, bigint, doc_lang_name_refs
+				)', true );
+				SELECT debug_on( 'try_wicci_serve_ajax(
+					env_refs, http_transfer_refs, wicci_user_refs, uri_query_refs,
+					uri_refs, page_uri_refs, doc_page_refs,
+					doc_refs, text
+				)', true );
+				SELECT debug_on( 'try_wicci_serve_body(
+					env_refs, wicci_user_refs, uri_query_refs,
+					doc_page_refs, doc_refs, doc_lang_name_refs
+				)', true );
+				SELECT debug_on( 'try_wicci_serve_body(
+					env_refs, http_transfer_refs,
+					wicci_user_refs, uri_query_refs, uri_refs,
+					page_uri_refs, doc_page_refs
+				)', true );
+				SELECT debug_on(
+					'wicci_serve_static_body(page_uri_refs,	http_response_name_refs)', true
+				);
+				SELECT debug_on( 'try_parse_http_requests(text)', true );
+				SELECT debug_on( 'new_http_transfer(text)', true );
+				SELECT debug_on( 'try_new_http_transfer(text)', true );
+				SELECT debug_on( 'try_parse_http_requests(text)', true );
+				SELECT debug_on( 'try_new_http_transfer(text)', true );
+$$ LANGUAGE sql SET search_path FROM CURRENT;
 
-SELECT debug_on('wicci_serve(text)', true);
-
-SELECT debug_on('wicci_serve(http_transfer_refs,uri_refs,uri_query_refs)', true);
-
--- SELECT debug_on('wicci_serve(env_refs, http_transfer_refs)', true);
-
-SELECT debug_on('try_wicci_serve_responses(
-	env_refs, http_transfer_refs, wicci_user_refs, uri_refs, uri_query_refs
-)', true );
-
-SELECT debug_on('try_wicci_serve_responses(
-		env_refs, http_transfer_refs, wicci_user_refs, uri_refs,
-		uri_query_refs,	http_response_refs, bigint, doc_lang_name_refs
-)', true );
-
-SELECT debug_on( 'try_wicci_serve_ajax(
-	env_refs, http_transfer_refs, wicci_user_refs, uri_query_refs,
-	uri_refs, page_uri_refs, doc_page_refs,
-	doc_refs, text
-)', true );
-
-SELECT debug_on( 'try_wicci_serve_body(
-	env_refs, wicci_user_refs, uri_query_refs,
-	doc_page_refs, doc_refs, doc_lang_name_refs
-)', true );
-
-SELECT debug_on( 'try_wicci_serve_body(
-	env_refs, http_transfer_refs,
-	wicci_user_refs, uri_query_refs, uri_refs,
-	page_uri_refs, doc_page_refs
-)', true );
+SELECT wicci_debug_on();
 
 -- SELECT test_func(
 -- 	'find_wicci_user(http_transfer_refs)',

@@ -26,7 +26,7 @@ CREATE TABLE wicci_responses (
 	name_ http_response_name_refs PRIMARY KEY
 		REFERENCES http_response_name_rows,
 	default_ http_response_refs NOT NULL
-		REFERENCES http_response_rows
+		REFERENCES http_response_keys
 );
 
 COMMENT ON TABLE wicci_responses IS
@@ -40,7 +40,7 @@ INSERT INTO wicci_responses(name_, default_) VALUES
 	( 'Server', get_http_response('Server', 'Wicci/0.2') ),
 	( 'Content-Type', get_http_response('Content-Type', 'text') );
 
-SELECT http_response_rows_ref('404',
+SELECT http_small_text_response_rows_ref('404',
 	get_http_response('_status', 'HTTP/1.1 404 Not Found')
 );
 
@@ -52,13 +52,13 @@ $$ LANGUAGE sql;
 
 
 CREATE TABLE IF NOT EXISTS wicci_lang_responses (
-	lang_ doc_lang_name_refs
+	lang doc_lang_name_refs
 		REFERENCES doc_lang_name_rows,
 	name_ http_response_name_refs
 		REFERENCES http_response_name_rows,
-	PRIMARY KEY(lang_, name_),
+	PRIMARY KEY(lang, name_),
 	default_ http_response_refs NOT NULL
-		REFERENCES http_response_rows
+		REFERENCES http_response_keys
 );
 
 COMMENT ON COLUMN wicci_lang_responses.default_ IS
@@ -68,7 +68,7 @@ CREATE OR REPLACE FUNCTION wicci_response_default_(
 	doc_lang_name_refs, http_response_name_refs
 ) RETURNS http_response_refs AS $$
 	SELECT default_ FROM wicci_lang_responses
-	WHERE lang_ = $1 AND name_ = $2
+	WHERE lang = $1 AND name_ = $2
 $$ LANGUAGE sql;
 
 COMMENT ON FUNCTION wicci_response_default_(
@@ -90,7 +90,7 @@ COMMENT ON FUNCTION wicci_response_default(
 ) IS '';
 
 DELETE FROM wicci_lang_responses;
-INSERT INTO wicci_lang_responses(lang_, name_, default_)
+INSERT INTO wicci_lang_responses(lang, name_, default_)
 VALUES
 	( 'html', '_doctype', get_http_response( '_doctype',
 		'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">'
@@ -117,3 +117,16 @@ CREATE OR REPLACE FUNCTION wicci_env_add_association(
 ) RETURNS env_refs AS $$
 	SELECT ( env_add_association($1, $2, $3, $4) ).env
 $$ LANGUAGE sql;
+
+CREATE TABLE IF NOT EXISTS supported_binary_doc_formats (
+	storage_policy regclass NOT NULL,
+	request_format http_response_name_refs NOT NULL,
+	PRIMARY KEY(storage_policy, request_format)
+);
+
+INSERT INTO supported_binary_doc_formats VALUES
+('file_doc_rows', '_body_bin'),
+('file_doc_rows', '_body_hex'),
+('blob_doc_rows', '_body_bin'),
+('blob_doc_rows', '_body_hex'),
+('large_object_doc_rows', '_body_lo');
