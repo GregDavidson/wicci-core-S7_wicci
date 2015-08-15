@@ -3,6 +3,7 @@
 *.i2
 *.o
 *.so
+*-html.sql
 *.sql-out
 *.sql-out-err
 *.ed

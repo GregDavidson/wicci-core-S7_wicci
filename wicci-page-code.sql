@@ -44,11 +44,13 @@ $$ LANGUAGE SQL STRICT;
 CREATE OR REPLACE FUNCTION try_wicci_user(
 	_url uri_refs, _cookies uri_query_refs
 ) RETURNS wicci_user_refs AS $$
-	SELECT try_wicci_user( try_entity_uri(
+	SELECT CASE WHEN user_text IS NULL THEN NULL
+  ELSE try_wicci_user( try_entity_uri(
 		CASE WHEN user_text ILIKE 'user:%'
 		THEN user_text ELSE 'user:' || user_text
 		END, 'user'
-	) ) FROM try_wicci_user_($1,$2) user_text
+	) )
+  END FROM try_wicci_user_($1,$2) user_text
 $$ LANGUAGE SQL STRICT;
 
 COMMENT ON FUNCTION try_wicci_user(
@@ -57,13 +59,25 @@ COMMENT ON FUNCTION try_wicci_user(
 'Given a request url and cookies, find wicci user from
 cookie header (or URI query data as a test feature!!)';
 
+CREATE OR REPLACE FUNCTION wicci_user_or_nil(
+	_url uri_refs, _cookies uri_query_refs
+) RETURNS wicci_user_refs AS $$
+	SELECT COALESCE( try_wicci_user($1, $2), wicci_user_nil() )
+$$ LANGUAGE SQL;
+
 CREATE OR REPLACE
-FUNCTION find_wicci_user(http_transfer_refs)
+FUNCTION find_wicci_user_or_nil(http_transfer_refs)
 RETURNS wicci_user_refs AS $$
 	SELECT COALESCE(try_wicci_user($1), wicci_user_nil())
 $$ LANGUAGE SQL;
 
-COMMENT ON FUNCTION find_wicci_user(http_transfer_refs)
+CREATE OR REPLACE
+FUNCTION find_wicci_user_or_nil(http_transfer_refs)
+RETURNS wicci_user_refs AS $$
+	SELECT non_null( try_wicci_user($1), 'find_wicci_user_or_nil(http_transfer_refs)' )
+$$ LANGUAGE SQL;
+
+COMMENT ON FUNCTION find_wicci_user_or_nil(http_transfer_refs)
 IS 'when no wicci user specified, default to
 unregistered user, i.e. wicci_user_nil()';
 

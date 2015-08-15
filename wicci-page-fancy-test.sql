@@ -9,10 +9,8 @@ SELECT COALESCE(
 	http_transfer_rows_ref('fancy',
 		new_http_xfer(
 			'GET fancy.html HTTP/1.1' || nl
-			|| 'User-Agent: Mozilla' || nl
-			|| nl
-			|| 'Hubba' || nl
-			|| 'Hubba' || nl
+			|| 'User-Agent: Mozilla' || nl,
+			hubba_bytes()
 ) )	) FROM text(E'\r\n') nl;
 
 SELECT fresh_http_transfer('fancy');
@@ -40,7 +38,7 @@ WHERE ref = http_transfer_rows_ref('fancy');
 
 SELECT wicci_grafts_from_to(
 	find_doc_page('fancy.html'),
-	find_wicci_user('user:greg@wicci.org')
+	find_wicci_user_or_nil('user:greg@wicci.org')
 );
 
 SELECT CASE WHEN _env IS NOT NULL THEN drop_env( _env ) END
@@ -51,7 +49,7 @@ SELECT env_rows_ref('fancy-greg', make_user_env());
 SELECT fresh_http_transfer('fancy');
 SELECT http_responses_text(try_wicci_serve_responses(
 	env_rows_ref('fancy-greg'),	ref,
-	find_wicci_user('user:greg@wicci.org'),
+	find_wicci_user_or_nil('user:greg@wicci.org'),
  try_get_http_requests_url(request),
  get_http_requests_cookies(request)
 )) FROM http_transfer_rows

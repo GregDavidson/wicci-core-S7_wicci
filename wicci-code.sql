@@ -46,8 +46,18 @@ RETURNS wicci_login_refs AS $$
 $$ LANGUAGE SQL;
 
 CREATE OR REPLACE
-FUNCTION wicci_login(wicci_user_refs) RETURNS wicci_login_refs AS $$
+FUNCTION try_wicci_login(wicci_user_refs) RETURNS wicci_login_refs AS $$
 	SELECT login_ FROM wicci_user_rows WHERE ref = $1
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE
+FUNCTION wicci_login(wicci_user_refs) RETURNS wicci_login_refs AS $$
+	SELECT non_null( try_wicci_login($1), 'wicci_login(wicci_user_refs)' )
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE
+FUNCTION wicci_login_or_nil(wicci_user_refs) RETURNS wicci_login_refs AS $$
+	SELECT COALESCE( try_wicci_login($1), wicci_login_nil() )
 $$ LANGUAGE SQL;
 
 -- ** I/O
@@ -226,11 +236,15 @@ RETURNS wicci_user_refs AS $$
 $$ LANGUAGE SQL STRICT;
 
 CREATE OR REPLACE
-FUNCTION find_wicci_user(entity_uri_refs)
+FUNCTION find_wicci_user_or_nil(entity_uri_refs)
 RETURNS wicci_user_refs AS $$
-	SELECT non_null(
-		try_wicci_user($1), 'find_wicci_user(entity_uri_refs)'
-	)
+	SELECT COALESCE( try_wicci_user($1), wicci_user_nil() )
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE
+FUNCTION find_wicci_user_or_nil(entity_uri_refs)
+RETURNS wicci_user_refs AS $$
+	SELECT non_null( try_wicci_user($1), 'find_wicci_user_or_nil(entity_uri_refs)' )
 $$ LANGUAGE SQL;
 
 -- ** I/O
@@ -254,8 +268,13 @@ FUNCTION try_wicci_user(text) RETURNS wicci_user_refs AS $$
 $$ LANGUAGE SQL STRICT;
 
 CREATE OR REPLACE
+FUNCTION find_wicci_user_or_nil(text) RETURNS wicci_user_refs AS $$
+	SELECT COALESCE( try_wicci_user($1), wicci_user_nil() )
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE
 FUNCTION find_wicci_user(text) RETURNS wicci_user_refs AS $$
-	SELECT non_null(try_wicci_user($1), 'find_wicci_user(text)', $1)
+	SELECT non_null( try_wicci_user($1), 'find_wicci_user_or_nil(text)' )
 $$ LANGUAGE SQL;
 
 CREATE OR REPLACE
@@ -709,13 +728,13 @@ $$ LANGUAGE SQL;
 CREATE OR REPLACE
 FUNCTION new_wicci_user_group(text, wicci_group_refs)
 RETURNS wicci_user_refs AS $$
-	SELECT new_wicci_user_group(find_wicci_user($1), $2)
+	SELECT new_wicci_user_group(find_wicci_user_or_nil($1), $2)
 $$ LANGUAGE SQL;
 
 CREATE OR REPLACE
 FUNCTION new_wicci_user_group(text, text)
 RETURNS wicci_user_refs AS $$
-	SELECT new_wicci_user_group(find_wicci_user($1), $2)
+	SELECT new_wicci_user_group(find_wicci_user_or_nil($1), $2)
 $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION try_wicci_user_drop_group(
@@ -793,7 +812,7 @@ CREATE OR REPLACE
 FUNCTION wicci_group_add_leader(wicci_group_refs, text)
 RETURNS wicci_group_refs AS $$
 	SELECT $1
-	WHERE wicci_group_add_leader( $1, find_wicci_user($2) );
+	WHERE wicci_group_add_leader( $1, find_wicci_user_or_nil($2) );
 $$ LANGUAGE sql;
 
 CREATE OR REPLACE
@@ -1307,6 +1326,7 @@ $$ LANGUAGE sql;
 
 -- * TABLE wicci_transfers_users
 
+-- only used in following function - candidate for upgrading!!
 CREATE OR REPLACE FUNCTION get_wicci_transfers_users(
 	http_transfer_refs, wicci_user_refs
 ) RETURNS wicci_transfers_users AS $$
@@ -1338,3 +1358,17 @@ COMMENT ON FUNCTION get_wicci_transfers_users(
 	http_transfer_refs, wicci_user_refs
 ) IS 'associates given http_transfer with given wicci_user_refs,
 creating new tuple if necessary';
+
+CREATE OR REPLACE FUNCTION set_wicci_transfer_user(
+	http_transfer_refs, wicci_user_refs,
+	 OUT http_transfer_refs, OUT wicci_user_refs
+)  AS $$
+	SELECT CASE
+		WHEN is_nil($2) THEN $1
+		ELSE ( get_wicci_transfers_users($1, $2) ).xfer_
+	END, $2
+$$ LANGUAGE sql;
+
+COMMENT ON FUNCTION 
+set_wicci_transfer_user(http_transfer_refs, wicci_user_refs)
+IS 'associates user, when non-nil, with transfer, returning both for threading';

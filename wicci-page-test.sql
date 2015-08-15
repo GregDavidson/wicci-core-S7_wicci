@@ -17,7 +17,7 @@ SELECT set_file('wicci-page-test.sql', '$Id');
 -- put in some more tests here!!!
 
 CREATE OR REPLACE FUNCTION public.wicci_debug_on() RETURNS void AS $$
-				SELECT debug_on( 'wicci_serve(text,http_response_name_refs)', true);
+				SELECT debug_on( 'wicci_serve(text,text)', true);
 				SELECT debug_on( 'wicci_serve(http_transfer_refs,uri_refs,uri_query_refs,http_response_name_refs)', true);
 				-- SELECT debug_on( 'wicci_serve(env_refs, http_transfer_refs)', true);
 				SELECT debug_on( 'try_wicci_serve_responses(
@@ -56,50 +56,36 @@ $$ LANGUAGE sql SET search_path FROM CURRENT;
 
 SELECT wicci_debug_on();
 
--- SELECT test_func(
--- 	'find_wicci_user(http_transfer_refs)',
--- 	find_wicci_user( http_transfer_rows_ref('host-simple') ),
--- 	wicci_user_nil()
--- );
-
--- SELECT test_func(
--- 	'find_doc_page(http_transfer_refs)',
--- 	find_doc_page( http_transfer_rows_ref('host-simple') ),
--- 	find_doc_page('simple.html')
--- );
-
--- SELECT wicci_serve( http_transfer_rows_ref('host-simple') );
-
 SELECT doc_page_doc( find_doc_page('simple.html') );
 
 SELECT tree_doc_text(simple)
 FROM find_page_doc('simple.html') simple;
 
-SELECT http_requests_text(http_transfer_requests(http_transfer_rows_ref('host-simple-greg')));
+SELECT http_requests_text(http_transfer_requests(http_transfer_rows_ref('simple-greg')));
 
-SELECT http_transfer_rows_ref('host-simple-greg')^'_url';
+SELECT http_transfer_rows_ref('simple-greg')^'_url';
 
 SELECT * FROM uri_rows
-WHERE ref = try_get_uri(http_transfer_rows_ref('host-simple-greg')
+WHERE ref = try_get_uri(http_transfer_rows_ref('simple-greg')
 ^'_url');
 
-SELECT try_get_uri( http_transfer_rows_ref('host-simple-greg')
+SELECT try_get_uri( http_transfer_rows_ref('simple-greg')
 ^'_url')^'user';
 
 SELECT try_get_uri(
-	http_transfer_rows_ref('host-simple-greg')^'_url'
+	http_transfer_rows_ref('simple-greg')^'_url'
 )^'user';
 
 -- returns NULL!!!
 SELECT try_entity_uri( try_get_uri(
-	http_transfer_rows_ref('host-simple-greg')^'_url'
+	http_transfer_rows_ref('simple-greg')^'_url'
 )^'user', 'user');
 
 SELECT try_wicci_user( try_entity_uri(try_get_uri(
-	http_transfer_rows_ref('host-simple-greg')^'_url'
+	http_transfer_rows_ref('simple-greg')^'_url'
 )^'user', 'user') );
 
--- SELECT wicci_serve( http_transfer_rows_ref('host-simple-greg') );
+-- SELECT wicci_serve( http_transfer_rows_ref('simple-greg') );
 
 CREATE OR REPLACE
 FUNCTION real_transfer(text, text, text = NULL, text = 'wicci.org')
@@ -163,7 +149,7 @@ SELECT http_requests_text(http_transfer_requests(
 ));
 
 -- returns NULL!!!
-SELECT find_wicci_user( http_transfer_rows_ref('real-simple') );
+SELECT find_wicci_user_or_nil( http_transfer_rows_ref('real-simple') );
 
 SELECT fresh_http_transfer('real-simple');
 
@@ -250,7 +236,7 @@ WHERE ref = http_transfer_rows_ref('wicci_hello_as_greg');
 SELECT COALESCE(
 	http_transfer_rows_ref(x),
 	http_transfer_rows_ref(x, new_http_xfer(
-'GET /Entity-Icon/group-bm.jpg?user=greg@wicci.org HTTP/1.1
+'GET /Entity-Icon/deadbeef.jpg?user=greg@wicci.org HTTP/1.1
 Host: wicci.org:8080
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:7.0.1) Gecko/20100101 Firefox/7.0.1
 Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
@@ -259,12 +245,12 @@ Accept-Encoding: gzip, deflate
 Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
 Connection: keep-alive
 
-') ) ) FROM handles('wicci_group_jpg_as_greg') x;
+') ) ) FROM handles('wicci_deadbeef_jpg_as_greg') x;
 
-SELECT fresh_http_transfer('wicci_group_jpg_as_greg');
+SELECT fresh_http_transfer('wicci_deadbeef_jpg_as_greg');
 SELECT http_transfer_text(wicci_serve(ref))
 FROM http_transfer_rows
-WHERE ref = http_transfer_rows_ref('wicci_group_jpg_as_greg');
+WHERE ref = http_transfer_rows_ref('wicci_deadbeef_jpg_as_greg');
 
 SELECT COALESCE(
 	http_transfer_rows_ref(x),

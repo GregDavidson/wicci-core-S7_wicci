@@ -91,11 +91,11 @@ FUNCTION get_site_( text, text, doc_refs = doc_nil() )
 RETURNS doc_page_refs AS $$
 	SELECT get_wicci_site(
 		get_doc_page( get_page_uri($1), $3 ),
-		find_wicci_user( find_entity_uri($2) )
+		find_wicci_user_or_nil( find_entity_uri($2) )
 	)
 $$ LANGUAGE SQL;
 
--- SELECT find_wicci_user(try_entity_uri(''));
+-- SELECT find_wicci_user_or_nil(try_entity_uri(''));
 
 -- SELECT page_uri_text(get_page_uri('wicci.net/error'));
 

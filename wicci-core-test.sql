@@ -16,72 +16,58 @@ SELECT set_file('wicci-core-test.sql', '$Id');
 
 SELECT test_func(
 	'find_page_uri(text)',
-	find_page_uri( 'simple.html'::text ) IS NOT NULL,
-	true
+	NOT is_nil( find_page_uri( 'simple.html'::text ) )
 );
 
 SELECT test_func(
 	'find_doc_page(text)',
-	find_doc_page( 'simple.html'::text ) IS NOT NULL,
-	true
+	NOT is_nil( find_doc_page( 'simple.html'::text ) )
 );
 
 SELECT test_func(
 	'find_doc_page(page_uri_refs)',
-	find_doc_page( 'simple.html'::page_uri_refs ) IS NOT NULL,
-	true
+	NOT is_nil( find_doc_page( 'simple.html'::page_uri_refs ) )
 );
 
 SELECT test_func(
 	'find_page_doc(page_uri_refs)',
-	find_page_doc( 'simple.html' ) IS NOT NULL,
-	true
+	NOT is_nil( find_page_doc( 'simple.html' ) )
 );
 
 TABLE view_logins;
 
 SELECT test_func(
 	'find_wicci_login(text)',
-	find_wicci_login( 'greg@ngender.net'::text ) IS NOT NULL,
-	true
+	NOT is_nil( find_wicci_login( 'greg@ngender.net'::text ) )
 );
 
 SELECT test_func(
 	'find_wicci_login(entity_uri_refs)',
-	find_wicci_login( 'greg@ngender.net'::entity_uri_refs )
-	IS NOT NULL,
-	true
+	NOT is_nil( find_wicci_login( 'greg@ngender.net'::entity_uri_refs ) )
 );
 
 TABLE view_users;
 
 SELECT test_func(
-	'find_wicci_user(text)',
-	find_wicci_user( 'user:greg@wicci.org'::text ) IS NOT NULL,
-	true
+	'find_wicci_user_or_nil(text)',
+	NOT is_nil(find_wicci_user_or_nil( 'user:greg@wicci.org'::text ))
 );
 
 SELECT test_func(
-	'find_wicci_user(entity_uri_refs)',
-	find_wicci_user( 'user:greg@wicci.org'::entity_uri_refs )
-	IS NOT NULL,
-	true
+	'find_wicci_user_or_nil(entity_uri_refs)',
+	NOT is_nil( find_wicci_user_or_nil( 'user:greg@wicci.org'::entity_uri_refs ) )
 );
 
 TABLE view_groups;
 
 SELECT test_func(
 	'find_wicci_group(text)',
-	find_wicci_group( 'group:puuhonua@wicci.org'::text )
-	IS NOT NULL,
-	true
+	NOT is_nil( find_wicci_group( 'group:puuhonua@wicci.org'::text ) )
 );
 
 SELECT test_func(
 	'find_wicci_group(entity_uri_refs)',
-	find_wicci_group( 'group:puuhonua@wicci.org'::entity_uri_refs )
-	IS NOT NULL,
-	true
+	NOT is_nil( find_wicci_group( 'group:puuhonua@wicci.org'::entity_uri_refs ) )
 );
 
 -- * special kinds
@@ -105,12 +91,12 @@ SELECT COALESCE(
 
 SELECT env_wicci_user(_env, _user) FROM
 	env_rows_ref('user:greg') _env,
-	find_wicci_user('user:greg@wicci.org'::text) _user;
+	find_wicci_user_or_nil('user:greg@wicci.org'::text) _user;
 
 SELECT test_func(
 	'try_env_wicci_user(env_refs)',
 	try_env_wicci_user( 'user:greg' ),
-	find_wicci_user('user:greg@wicci.org'::text)
+	find_wicci_user_or_nil('user:greg@wicci.org'::text)
 );
 
 /* WTF ???

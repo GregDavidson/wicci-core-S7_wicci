@@ -18,7 +18,7 @@ VIEW wicci_response_names(name_) AS
 VALUES
 	( http_response_name_refs '_status'),
 	( 'Date'), ( 'Server'), ( 'Set-Cookie'),
-	( 'Content-Length'), ( 'Content-Type'), ( '_body');
+	( 'Content-Length'), ( 'Content-Type'); -- , ( '_body');
 
 DROP TABLE IF EXISTS wicci_responses CASCADE;
 

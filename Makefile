@@ -5,7 +5,7 @@
 # All other use requires my permission in writing.
 include ../Makefile.wicci
 all: $(DepMakes) $(SchemaOut)
-include $(DepMakes)
+-include $(DepMakes)
 # xfiles must not be made until we've defined our
 # meta tags in wicci-code.sql!!
 xfiles: wicci-code.sql-out			# do in WICCI-SQL-FILES!!

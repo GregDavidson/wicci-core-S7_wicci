@@ -12,7 +12,7 @@ SELECT set_file('wicci-page-fancy-data.sql', '$Id');
 SELECT COALESCE(
 	wicci_transaction_rows_ref('greg@wicci.org/fancy'),
 	wicci_transaction_rows_ref('greg@wicci.org/fancy',
-		new_wicci_trans(find_wicci_user('user:greg@wicci.org'))
+		new_wicci_trans(find_wicci_user_or_nil('user:greg@wicci.org'))
 	)
 );
 
@@ -48,7 +48,7 @@ SELECT test_func(
 	'wicci_grafts(doc_page_refs, wicci_user_refs)',
 	array_length( ARRAY( SELECT wicci_grafts(
 		find_doc_page('fancy.html'),
-		find_wicci_user('user:greg@wicci.org')
+		find_wicci_user_or_nil('user:greg@wicci.org')
 	) ) ),
 	4
 );

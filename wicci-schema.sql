@@ -189,7 +189,10 @@ COMMENT ON TABLE wicci_site_rows IS
 COMMENT ON COLUMN wicci_site_rows.ref IS
 'ref of a page which is also a site, typically a domain';
 COMMENT ON COLUMN wicci_site_rows.owner_ IS
-'ref of website owner';
+'ref of website owner;
+should this become a group so that it can either
+be owned by a specific individual or a literal
+group of such???';
 
 SELECT create_notes_for('wicci_site_rows');
 
