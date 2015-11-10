@@ -68,13 +68,23 @@ $$ LANGUAGE SQL;
 CREATE OR REPLACE
 FUNCTION find_wicci_user_or_nil(http_transfer_refs)
 RETURNS wicci_user_refs AS $$
-	SELECT COALESCE(try_wicci_user($1), wicci_user_nil())
+	SELECT wicci_user_or_nil( _url, _cookies ) FROM
+		http_transfer_rows,
+		get_http_requests_url(request) _url,
+		get_http_requests_cookies(request) _cookies
+	WHERE ref = $1
 $$ LANGUAGE SQL;
 
 CREATE OR REPLACE
-FUNCTION find_wicci_user_or_nil(http_transfer_refs)
+FUNCTION find_wicci_user(http_transfer_refs)
 RETURNS wicci_user_refs AS $$
-	SELECT non_null( try_wicci_user($1), 'find_wicci_user_or_nil(http_transfer_refs)' )
+	SELECT non_null(
+		try_wicci_user(_url, _cookies), 'find_wicci_user_or_nil(http_transfer_refs)'
+	) FROM
+		http_transfer_rows,
+		get_http_requests_url(request) _url,
+		get_http_requests_cookies(request) _cookies
+	WHERE ref = $1
 $$ LANGUAGE SQL;
 
 COMMENT ON FUNCTION find_wicci_user_or_nil(http_transfer_refs)
@@ -202,7 +212,7 @@ IS 'Incomplete!!!';
 
 CREATE OR REPLACE FUNCTION wicci_date()
 RETURNS http_response_refs AS $$
-	SELECT get_http_response(
+	SELECT get_http_text_response(
 		'Date',  http_cookie_time(CURRENT_TIMESTAMP)::text
 	)
 $$ LANGUAGE sql;
@@ -213,7 +223,7 @@ CREATE OR REPLACE FUNCTION try_wicci_cookie(
 ) RETURNS http_response_refs AS $$
 	SELECT CASE
 		WHEN is_nil(_user) THEN NULL
-		ELSE get_http_response(
+		ELSE get_http_text_response(
 				'Set-Cookie',
 				try_http_cookie_text(
 				_url := $5,
