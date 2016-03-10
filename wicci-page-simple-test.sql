@@ -38,8 +38,8 @@ SELECT debug_on(
 SELECT debug_on(
 	'try_wicci_serve_responses(
 		env_refs, http_transfer_refs,
-		wicci_user_refs, uri_refs,
-		uri_query_refs, bigint, doc_lang_name_refs
+		wicci_user_refs, uri_refs,	uri_query_refs,
+		http_response_refs,  bigint, doc_lang_name_refs
 	)',
 	true
 );
@@ -145,7 +145,7 @@ SELECT drop_env_give_value(	_env_, (
 WHERE htr.ref = http_transfer_rows_ref('simple');
 
 -- this is returning a 404 !!!
-SELECT drop_env_give_value(	_env, latin1(_body) ) FROM
+SELECT drop_env_give_value(	_env, http_response_text(_body) ) FROM
 	http_transfer_rows htr,
 	make_user_env() _env,
 	get_http_requests_url(request) _url,
@@ -189,7 +189,7 @@ SELECT env_rows_ref('simple-nobody', make_user_env());
 SELECT fresh_http_transfer('simple');
 SELECT http_responses_text(try_wicci_serve_responses(
 	_env,	ref, _user, _url, _cookies,
-	body_len, _lang
+	_body, body_len, _lang
 )), _body
 FROM http_transfer_rows,
 	env_rows_ref('simple-nobody') _env,
@@ -217,7 +217,7 @@ SELECT http_responses_text(try_wicci_serve_responses(
 	find_wicci_user('user:greg@wicci.org'),
 	get_http_requests_url(request),
 	get_http_requests_cookies(request),
-	0, doc_lang_name_nil()
+	http_small_text_response_nil(), 0, doc_lang_name_nil()
 )) FROM http_transfer_rows
 WHERE ref = http_transfer_rows_ref('simple');
 
@@ -225,25 +225,37 @@ WHERE ref = http_transfer_rows_ref('simple');
 
 SELECT refs_ready();
 
--- this is returning a 404!!!
-SELECT test_func(
-	'wicci_serve(bytea,bytea,text)',
-	( SELECT array_agg(el)
-		FROM
-			(	SELECT ARRAY[h, v, latin1(b)]
-				FROM wicci_serve(
-					latin1(E'GET /simple.html?host=wicci.org&user=greg@wicci.org HTTP/1.1\r\nMIME-Version: 1.0\r\nConnection: keep-alive\r\nExtension: Security/Digest Security/SSL\r\nHost: localhost:8080\r\nAccept-encoding: gzip\r\nAccept: */*\r\nUser-Agent: URL/Emacs\r\n'),
-					latin1(''),
-					'_body_bin'
-				) AS foo(h,v,b)
-			) foo(ra),
-			unnest(ra) el
-		),
-ARRAY[
-		'_status', 'HTTP/1.1 404 Not Found', NULL,
-		'Server', 'Wicci/0.2', NULL,
-		'Content-Length', '2559', NULL,
-		'Content-Type', 'text/html; charset=UTF-8', NULL
-	]
+SELECT debug_on(
+	'try_new_http_transfer(bytea, bytea)',
+	true
 );
+
+SELECT debug_on(
+  'try_new_http_transfer(http_request_refs[], bytea)',
+  true
+);
+
+SELECT wicci_serve(latin1, ''::bytea)
+FROM latin1(E'GET /simple.html?host=wicci.org&user=greg@wicci.org 1.1\r\nUser-Agent: curl/7.35.0');
+
+-- Houston, we've got a problem: !!!
+
+-- this is returning a big mess of a 404!!!
+-- SELECT test_func(
+-- 	'wicci_serve(bytea,bytea,text)',
+-- 	( SELECT array_agg(el)
+-- 		FROM
+-- 			(	SELECT ARRAY[h, v, latin1(b)]
+-- 				FROM wicci_serve(
+-- 					latin1(E'GET /simple.html?host=wicci.org&user=greg@wicci.org HTTP/1.1\r\nMIME-Version: 1.0\r\nConnection: keep-alive\r\nExtension: Security/Digest Security/SSL\r\nHost: localhost:8080\r\nAccept-encoding: gzip\r\nAccept: */*\r\nUser-Agent: URL/Emacs\r\n'),
+-- 					latin1(''),
+-- 					'_body_bin'
+-- 				) AS foo(h,v,b)
+-- 			) foo(ra),
+-- 			unnest(ra) el
+-- 		),
+-- ARRAY[
+
+-- 	]
+-- );
 

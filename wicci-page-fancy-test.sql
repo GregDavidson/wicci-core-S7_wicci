@@ -28,12 +28,16 @@ FROM try_env( 'fancy-nobody' ) _env;
 SELECT env_rows_ref('fancy-nobody', make_user_env());
 
 SELECT fresh_http_transfer('fancy');
-SELECT http_responses_text(try_wicci_serve_responses(
-	env_rows_ref('fancy-nobody'), ref,
-	wicci_user_nil(),
- try_get_http_requests_url(request),
- get_http_requests_cookies(request)
-)) FROM http_transfer_rows
+SELECT http_responses_text( try_wicci_serve_responses(
+	_env,	ref, _user, _url, _cookies, _body, body_len, _lang
+) ) FROM
+	http_transfer_rows,
+	env_rows_ref('fancy-nobody') _env,
+	wicci_user_nil() _user,
+	try_get_http_requests_url(request) _url,
+	get_http_requests_cookies(request) _cookies,
+	wicci_serve_body(_env, ref, _user, _url, _cookies, find_page_uri(_url), '_body_bin')
+		bar(_body, body_len, _lang)
 WHERE ref = http_transfer_rows_ref('fancy');
 
 SELECT wicci_grafts_from_to(
@@ -47,10 +51,15 @@ FROM try_env( 'fancy-greg' ) _env;
 SELECT env_rows_ref('fancy-greg', make_user_env());
 
 SELECT fresh_http_transfer('fancy');
-SELECT http_responses_text(try_wicci_serve_responses(
-	env_rows_ref('fancy-greg'),	ref,
-	find_wicci_user_or_nil('user:greg@wicci.org'),
- try_get_http_requests_url(request),
- get_http_requests_cookies(request)
-)) FROM http_transfer_rows
+
+SELECT http_responses_text( try_wicci_serve_responses(
+	_env,	ref, _user, _url, _cookies, _body, body_len, _lang
+) ) FROM
+	http_transfer_rows,
+	env_rows_ref('fancy-greg') _env,
+	find_wicci_user_or_nil('user:greg@wicci.org') _user,
+	try_get_http_requests_url(request) _url,
+	get_http_requests_cookies(request) _cookies,
+	wicci_serve_body(_env, ref, _user, _url, _cookies, find_page_uri(_url), '_body_bin')
+		bar(_body, body_len, _lang)
 WHERE ref = http_transfer_rows_ref('fancy');
