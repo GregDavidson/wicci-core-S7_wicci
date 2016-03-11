@@ -5,6 +5,12 @@ SELECT set_file('tag-schema.sql', '$Id');
 -- Tag Schema
 -- An architecture for Semantic Tagging
 
+-- NOTE: This is just a scratch document,
+--            not yet part of the Wicci System.
+--            added to the repository in hopes
+--            that it will lead to something
+--            worthwhile.
+
 -- ** Copyright
 
 -- Copyright (c) 2012-2014, J. Greg Davidson.

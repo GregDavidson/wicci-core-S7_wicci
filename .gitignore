@@ -9,6 +9,7 @@
 *.ed
 *.foo
 foo.*
+*.foo.sql
 TAGS
 TAGS-*
 Limbo

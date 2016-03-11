@@ -128,3 +128,13 @@ INSERT INTO supported_binary_doc_formats VALUES
 ('blob_doc_rows', '_body_bin'),
 ('blob_doc_rows', '_body_hex'),
 ('large_object_doc_rows', '_body_lo');
+
+
+CREATE TYPE header_text_binary AS (
+	"name" text,
+	text_value text,
+	binary_value bytea
+);
+
+COMMENT ON TYPE header_text_binary IS
+'The return type of public http service functions';

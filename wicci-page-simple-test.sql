@@ -230,6 +230,25 @@ SELECT debug_on(
 	true
 );
 
+-- this is returning a big mess of a 404!!!
+-- SELECT test_func(
+-- 	'wicci_serve(bytea,bytea,text)',
+-- 	( SELECT array_agg(el)
+-- 		FROM
+-- 			(	SELECT ARRAY[h, v, latin1(b)]
+-- 				FROM wicci_serve(
+-- 					latin1(E'GET /simple.html?host=wicci.org&user=greg@wicci.org HTTP/1.1\r\nMIME-Version: 1.0\r\nConnection: keep-alive\r\nExtension: Security/Digest Security/SSL\r\nHost: localhost:8080\r\nAccept-encoding: gzip\r\nAccept: */*\r\nUser-Agent: URL/Emacs\r\n'),
+-- 					latin1(''),
+-- 					'_body_bin'
+-- 				) AS foo(h,v,b)
+-- 			) foo(ra),
+-- 			unnest(ra) el
+-- 		),
+-- ARRAY[
+
+-- 	]
+-- );
+
 SELECT debug_on(
   'try_new_http_transfer(http_request_refs[], bytea)',
   true

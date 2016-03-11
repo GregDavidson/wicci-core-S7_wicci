@@ -355,7 +355,7 @@ FUNCTION wicci_serve_responses(bytea, bytea, http_response_name_refs) IS '
 
 CREATE OR REPLACE
 FUNCTION public.wicci_serve(bytea, bytea, _bin_ text = '_body_bin')
-RETURNS TABLE("name" text, text_value text, binary_value bytea)  AS $$
+RETURNS SETOF header_text_binary  AS $$
 	SELECT http_response_name_text(name_), text_value, binary_value FROM
   	http_response_rows _row,
 		debug_enter('wicci_serve(bytea,bytea,text)', latin1($1), $3) _this,
@@ -479,3 +479,43 @@ CREATE OR REPLACE FUNCTION public.wicci_debug_on(setting boolean = true) RETURNS
  SELECT debug_on( 'try_new_http_transfer(bytea, bytea)', setting );
  SELECT debug_on( 'try_parse_http_requests(bytea)', setting );
 $$ LANGUAGE sql SET search_path FROM CURRENT;
+
+-- CREATE OR REPLACE
+-- FUNCTION public.wicci_echo_headers(bytea, bytea, _bin_ text = '_body_bin')
+-- RETURNS SETOF header_text_binary  AS $$
+--   SELECT http_request_name_text(name_), value_, ''::bytea FROM
+-- 		debug_enter('wicci_echo_headers(bytea, bytea, text)', $1) _this,
+-- 		http_request_rows rows,
+-- 		parse_http_requests($1) refs
+-- 	WHERE rows.ref = ANY (refs)
+-- $$ LANGUAGE sql SET search_path FROM CURRENT;
+
+-- SELECT n, t, latin1(b) b FROM
+-- wicci_echo_headers(latin1(req_test_hdrs('wicci.org')), hubba_bytes(), '_body_bin') foo(n,t,b);
+
+-- RETURNS TABLE("name" text, text_value text, binary_value bytea)  AS $$
+-- CREATE OR REPLACE
+-- FUNCTION public.wicci_echo_body(bytea, bytea, _bin_ text = '_body_bin')
+-- RETURNS SETOF header_text_binary  AS $$
+-- 	SELECT CASE $3
+--     WHEN '_body_bin' THEN ($3, ''::text, $2)::header_text_binary
+--     WHEN '_body' THEN ($3, latin1($2), ''::bytea)::header_text_binary
+-- 	END FROM
+-- 		debug_enter('wicci_echo_body(bytea, bytea, text)', latin1($2)) this
+-- $$ LANGUAGE sql SET search_path FROM CURRENT;
+
+-- SELECT n, t, latin1(b) b FROM
+-- wicci_echo_body(latin1(req_test_hdrs('wicci.org')), hubba_bytes(), '_body_bin') foo(n,t,b);
+
+-- DROP FUNCTION public.wicci_echo_request(bytea, bytea, text);
+-- RETURNS TABLE("name" text, text_value text, binary_value bytea)  AS $$
+-- CREATE OR REPLACE
+-- FUNCTION public.wicci_echo_request(bytea, bytea, _bin_ text = '_body_bin')
+-- RETURNS SETOF header_text_binary  AS $$
+-- 	SELECT wicci_echo_headers($1, $2, $3)
+-- 	UNION
+-- 	SELECT wicci_echo_body($1, $2, $3)
+-- $$ LANGUAGE sql SET search_path FROM CURRENT;
+
+-- SELECT n, t, latin1(b) b FROM
+-- wicci_echo_request(latin1(req_test_hdrs('wicci.org')), hubba_bytes(), '_body_bin') foo(n,t,b);
