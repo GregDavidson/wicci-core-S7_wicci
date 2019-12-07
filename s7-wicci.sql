@@ -7,7 +7,7 @@ SELECT set_file('s7-wicci.sql', '$Id');
 CREATE OR REPLACE
 FUNCTION public.wicci_ready(text = '') RETURNS void AS $$
 BEGIN
-	PERFORM refs_ready();
+	PERFORM s1_refs.ensure_schema_ready();
   -- PERFORM require_module(''s7_wicci.wicci-page-code'');
 	RAISE NOTICE 'wicci_ready(%)', $1;
 END
@@ -17,7 +17,7 @@ $$ LANGUAGE plpgsql SET search_path FROM CURRENT;
 
 :function public.wicci_ready(text = ''):void $$
 BEGIN
-	PERFORM refs_ready();
+	PERFORM s1_refs.ensure_schema_ready();
   -- PERFORM require_module(''s7_wicci.wicci-page-code'');
 	RAISE NOTICE 'wicci_ready(%)', $1;
 --	:notice 'wicci_ready(%)', $1;
